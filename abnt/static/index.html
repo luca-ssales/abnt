@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formatador ABNT — Ajuste Automático de .DOCX (NBR 14724)</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-badge" aria-hidden="true">ABNT</span>
+        <div>
+          <h1>Formatador ABNT</h1>
+          <p class="subtitle">Padronização estética automática (NBR 14724, 6024, 10520 e 6023) com <strong>100% de preservação do seu texto</strong>.</p>
+        </div>
+      </div>
+      <div class="golden-rule-pill" role="note">
+        <span class="shield-icon" aria-hidden="true">&#10003;</span>
+        <span>Zero alteração de texto: não apaga, não resume e não reescreve nada</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <div id="error-banner" class="alert alert-error hidden" role="alert" aria-live="assertive">
+      <div class="alert-content">
+        <strong>Atenção:</strong> <span id="error-message"></span>
+      </div>
+      <button type="button" id="close-error-btn" class="alert-close" aria-label="Fechar aviso">&times;</button>
+    </div>
+
+    <!-- ETAPA 1 E 2: Upload + Opções ABNT -->
+    <section id="form-section" class="card">
+      <form id="format-form" novalidate>
+        <h2>1. Envie seu documento Word (.docx)</h2>
+        <p class="section-helper">
+          Imagens, tabelas, notas de rodapé, hiperlinks, listas e comentários são integralmente preservados. Limite de 20 MB.
+        </p>
+
+        <div
+          id="drop-zone"
+          class="drop-zone"
+          tabindex="0"
+          role="button"
+          aria-label="Arraste e solte um arquivo .docx aqui ou pressione Enter para selecionar"
+        >
+          <input
+            type="file"
+            id="file-input"
+            name="file"
+            accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            class="sr-only"
+          />
+          <div class="drop-icon" aria-hidden="true">📄</div>
+          <p class="drop-title" id="drop-title">Arraste e solte seu arquivo <strong>.docx</strong> aqui</p>
+          <p class="drop-subtitle" id="drop-subtitle">ou clique para procurar no computador (máx. 20 MB)</p>
+          <div id="selected-file-pill" class="file-pill hidden">
+            <span id="selected-file-name"></span>
+            <button type="button" id="remove-file-btn" class="remove-file-btn" title="Remover arquivo">&times;</button>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <h2>2. Opções de Formatação ABNT</h2>
+        <p class="section-helper">Os valores padrão já estão configurados conforme as normas vigentes da ABNT.</p>
+
+        <div class="options-grid">
+          <div class="form-group">
+            <label for="font-name">Fonte principal (NBR 14724)</label>
+            <select id="font-name" name="font_name">
+              <option value="Times New Roman" selected>Times New Roman (Padrão ABNT)</option>
+              <option value="Arial">Arial</option>
+            </select>
+            <small class="field-hint">Citações longas, notas de rodapé, legendas e paginação serão ajustadas automaticamente para 10 pt.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="font-size">Tamanho do texto corrido</label>
+            <select id="font-size" name="font_size">
+              <option value="12" selected>12 pt (Padrão ABNT)</option>
+            </select>
+            <small class="field-hint">Espaçamento 1,5 entre linhas e recuo de 1,25 cm na 1ª linha do parágrafo.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="work-type">Tipo de trabalho acadêmico</label>
+            <select id="work-type" name="work_type">
+              <option value="tcc" selected>TCC / Monografia / Dissertação (NBR 14724)</option>
+              <option value="artigo">Artigo Científico (NBR 6022)</option>
+              <option value="relatorio">Relatório Técnico / Acadêmico (NBR 10719)</option>
+            </select>
+            <small id="work-type-hint" class="field-hint">Seções primárias iniciam em nova página; numeração exibida a partir da Introdução.</small>
+          </div>
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="insert-auto-toc" name="insert_auto_toc" />
+          <label for="insert-auto-toc">
+            <strong>Opcional:</strong> Inserir campo de Sumário Automático do Word (TOC) caso exista a seção <em>SUMÁRIO</em> no documento.
+          </label>
+        </div>
+
+        <div class="privacy-notice">
+          🔒 <strong>Privacidade garantida:</strong> Seu arquivo original é apagado do servidor imediatamente após o processamento.
+        </div>
+
+        <div class="actions-row">
+          <button type="submit" id="submit-btn" class="btn btn-primary" disabled>
+            <span id="submit-btn-text">Formatar documento</span>
+            <span id="submit-spinner" class="spinner hidden" aria-hidden="true"></span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ETAPA 4: Tela de Resultado -->
+    <section id="result-section" class="card hidden" aria-live="polite">
+      <div class="result-header">
+        <div>
+          <span class="badge-success">Formatação Concluída</span>
+          <h2>Seu documento está pronto nas normas da ABNT!</h2>
+          <p class="section-helper">Auditoria de integridade verificada: <strong>100% do texto original preservado sem nenhuma alteração de conteúdo.</strong></p>
+        </div>
+      </div>
+
+      <div class="download-actions">
+        <a id="download-docx-btn" href="#" class="btn btn-success" download>
+          ⬇ Baixar .DOCX Formatado
+        </a>
+        <a id="download-pdf-btn" href="#" class="btn btn-secondary hidden" download>
+          📑 Baixar também em PDF
+        </a>
+        <button type="button" id="reset-btn" class="btn btn-outline">
+          Formatar outro documento
+        </button>
+      </div>
+
+      <!-- Estatísticas rápidas -->
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <!-- Relatório Antes e Depois -->
+      <div class="report-box">
+        <h3>📋 Relatório "Antes e Depois" (O que foi ajustado)</h3>
+        <ul id="changes-list" class="changes-list"></ul>
+      </div>
+
+      <!-- Avisos para revisão manual -->
+      <div id="warnings-container" class="warnings-box hidden">
+        <h3>⚠️ Itens para Revisão Manual (Ambiguidades preservadas por segurança)</h3>
+        <p class="warnings-intro">
+          Seguindo a regra de ouro de nunca alterar ou adivinhar destrutivamente sua estrutura quando há dúvida, os itens abaixo tiveram apenas a fonte/espaçamento básico padronizados. Vale conferir no Word:
+        </p>
+        <div id="warnings-list" class="warnings-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Formatador ABNT — Desenvolvido com foco em integridade documental (NBR 14724, NBR 6024, NBR 10520, NBR 6023 e NBR 6028).</p>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
+
